@@ -811,3 +811,1658 @@ dev.off()
 hc.dpred <- hclust(dpred$dist)
 plot(hc.dpred)
 
+
+      ######################
+      ### Clusterización ###
+      ######################
+
+# Para usar métodos de clustering la disimilaridad tiene una estructura similar a una matriz triangular
+# por ello se calculan nuevamente o con el método directmente. 
+
+# 1. Euclidiana 
+#library(TSclust)
+
+euclidiana <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+euclidiana <- diss(t(time_series_list), "EUCL")
+names(euclidiana) <- stocks
+
+## Clustering Jerarquico de la librerí hclust {stats}, existen otras librerías
+
+# (i) Ward's minimum variance method aims at finding compact, spherical clusters. 
+# Two different algorithms are found in the literature for Ward clustering. 
+# The one used by option "ward.D" (equivalent to the only Ward option "ward" in R versions ≤ 3.0.3)
+# does not implement Ward's (1963) clustering criterion, 
+
+hc_eucl_w <- hclust(euclidiana, method = "ward.D")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_w)
+dev.off()
+# Resulta el mismo dendograma que complete
+
+hc_eucl_w$method #complete
+hc_eucl_w$order
+hc_eucl_w$labels
+
+cluster.evaluation(rep(1:4, each = 3), hc_eucl_w$labels) # 0.5
+
+cluster.evaluation(hc_eucl_w2$order, hc_eucl_w$labels) # 1
+
+# Etiquetas asignando un número de grupos o nivel de heigth
+hc_eucl_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol <- matrix(0, nrow = 12, ncol = 20)
+rownames(Four.cluster.sol) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol[,1] <- cutree(hc_eucl_w, k = 4)
+
+
+# (ii) whereas option "ward.D2" implements that criterion (Murtagh and Legendre 2014).
+# With the latter, the dissimilarities are squared before cluster updating. 
+# Note that agnes(*, method="ward") corresponds to hclust(*, "ward.D2").
+
+
+hc_eucl_w2 <- hclust(euclidiana, method = "ward.D2")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_w2)
+dev.off()
+# Resulta el mismo dendograma que complete
+
+hc_eucl_w2$method #complete
+hc_eucl_w2$order
+hc_eucl_w2$labels
+
+cluster.evaluation(rep(1:4, each = 3), hc_eucl_w2$labels) # 0.5
+
+cluster.evaluation(hc_eucl_w2$order, hc_eucl_w2$labels) # 1
+
+# Etiquetas asignando un número de grupos o nivel de heigth
+hc_eucl_w2$height
+
+#tree en 4 clusters
+Four.cluster.sol[,2] <- cutree(hc_eucl_w2, k = 4)
+
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_eucl_complete <- hclust(euclidiana, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_complete)
+dev.off()
+# Resulta el mismo dendograma que complete
+
+hc_eucl_complete$method #complete
+hc_eucl_complete$order
+hc_eucl_complete$labels
+
+cluster.evaluation(rep(1:4, each = 3), hc_eucl_complete$labels) # 0.5
+
+cluster.evaluation(hc_eucl_complete$order, hc_eucl_complete$labels) # 1
+
+# Etiquetas asignando un número de grupos o nivel de heigth
+hc_eucl_complete$height
+
+
+#tree en 4 clusters
+Four.cluster.sol[,3] <- cutree(hc_eucl_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_eucl_single <- hclust(euclidiana, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol[,4] <- cutree(hc_eucl_single, k = 4)
+
+#Parece una cascada
+
+# (v) average (UPGMA)
+
+hc_eucl_average <- hclust(euclidiana, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol[,5] <- cutree(hc_eucl_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_eucl_mcquitty <- hclust(euclidiana, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol[,6] <- cutree(hc_eucl_mcquitty, k = 4)
+
+
+# The other methods can be regarded as aiming for clusters with characteristics somewhere between the single and complete link methods. 
+
+# Note however, that methods "median" and "centroid" are not leading to a monotone distance measure, 
+#or equivalently the resulting dendrograms can have so called inversions or reversals which are hard to interpret, but note the trichotomies in Legendre and Legendre (2012).
+
+# (vii) median (WPGMC)
+
+hc_eucl_median <- hclust(euclidiana, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol[,7] <- cutree(hc_eucl_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_eucl_centroid <- hclust(euclidiana, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_eucl_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_eucl_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol[,8] <- cutree(hc_eucl_centroid, k = 4)
+
+
+
+
+# 2. Distancia Fréchet, Tarda más su cálculo de manera considerable
+
+
+
+# 3. Distancia Dynamic Time Warping, 
+
+# Se basa en la libreria dtw (Georgino 2009)
+#install.packages('dtw')
+library('dtw')
+
+#library(TSclust)
+# Se observa que la distancia de este paquete si es simétrica a diferencia del de Python
+# Tarda menos de un minuto para 66 distancias
+
+dynamic <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+dynamic <- diss(t(time_series_list), "DTWARP")
+names(dynamic) <- stocks
+
+## Clustering Jerarquico de la librerí hclust {stats}, existen otras librerías
+
+# (i) Ward's
+
+hc_dtw_w <- hclust(dynamic, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_dtw_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.DTW <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.DTW) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,1] <- cutree(hc_dtw_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_dtw_w2 <- hclust(dynamic, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,2] <- cutree(hc_dtw_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_dtw_complete <- hclust(dynamic, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,3] <- cutree(hc_dtw_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_dtw_single <- hclust(dynamic, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,4] <- cutree(hc_dtw_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_dtw_average <- hclust(dynamic, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,5] <- cutree(hc_dtw_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_dtw_mcquitty <- hclust(dynamic, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,6] <- cutree(hc_dtw_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_dtw_median <- hclust(dynamic, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,7] <- cutree(hc_dtw_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_dtw_centroid <- hclust(dynamic, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_dtw_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_dtw_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.DTW[,8] <- cutree(hc_dtw_centroid, k = 4)
+
+# 4. Dissimilarity Index Combining Temporal Correlation and Raw Values Behaviors CORT
+
+# Basada en un índice cubre el comportamiento dinámico de series y su proximidad en las observaciones
+# La distancia está ponderada por una función exponencial ponderada de coef de correlación temporal de primer orden 
+# multiplicada por una distancia convencional
+
+diss.CORT(time_series_list[[1]], time_series_list[[2]], k = 2, deltamethod="Euclid")
+
+# Se observa que es muy rápida, se podrían evaluar otros deltamethods
+
+
+temp_cor <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+temp_cor <- diss(t(time_series_list), "CORT", k=2, deltamethod = "Euclid")
+names(temp_cor) <- stocks
+
+## Clustering Jerarquico de la librerí hclust {stats}, existen otras librerías
+
+# (i) Ward's
+
+hc_cort_w <- hclust(temp_cor, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_cort_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.cort <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.cort) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,1] <- cutree(hc_cort_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_cort_w2 <- hclust(temp_cor, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,2] <- cutree(hc_cort_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_cort_complete <- hclust(temp_cor, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,3] <- cutree(hc_cort_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_cort_single <- hclust(temp_cor, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,4] <- cutree(hc_cort_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_cort_average <- hclust(temp_cor, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,5] <- cutree(hc_cort_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_cort_mcquitty <- hclust(temp_cor, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,6] <- cutree(hc_cort_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_cort_median <- hclust(temp_cor, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,7] <- cutree(hc_cort_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_cort_centroid <- hclust(temp_cor, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cort_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cort_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cort[,8] <- cutree(hc_cort_centroid, k = 4)
+
+# 5. Correlación directa
+# Se calcula la correlación de Pearson directamente para 3 métodos
+
+# (i) Método Pearson
+cor(x=time_series_list[[1]], y=time_series_list[[2]], use = "everything", method = "pearson")
+
+diss.COR(time_series_list[[1]], time_series_list[[2]]) # La distancia de TSclust está normalizada 
+# Valores iguales a cero es igual y mayores a 1 son los más lejanos
+
+# Esta distancia también se describe y utiliza en Begušić y Kostanjčar (2019), para el calculo de estimadores
+
+pearson <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+
+for (i in 1:length(stocks)) {
+  for (j in 1:length(stocks)) {
+    # Calcular la distancia entre cada par de stock
+    pearson[i, j] <- cor(x=time_series_list[[i]], y=time_series_list[[j]], use = "everything", method = "pearson")
+  }
+}
+
+pearson <- as.dist(1-pearson) # Las distancias son iguales si pearson = 1, se toma una inversión a similaridad
+
+
+## Clustering Jerarquico de la librerí hclust {stats}, existen otras librerías
+
+# (i) Ward's
+
+hc_pearson_w <- hclust(pearson, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_pearson_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.pearson <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.pearson) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,1] <- cutree(hc_pearson_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_pearson_w2 <- hclust(pearson, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,2] <- cutree(hc_pearson_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_pearson_complete <- hclust(pearson, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,3] <- cutree(hc_pearson_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_pearson_single <- hclust(pearson, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,4] <- cutree(hc_pearson_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_pearson_average <- hclust(pearson, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,5] <- cutree(hc_pearson_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_pearson_mcquitty <- hclust(pearson, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,6] <- cutree(hc_pearson_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_pearson_median <- hclust(pearson, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,7] <- cutree(hc_pearson_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_pearson_centroid <- hclust(pearson, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pearson_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pearson_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pearson[,8] <- cutree(hc_pearson_centroid, k = 4)
+
+
+# Validar como se reproduce para Spearman y Kendall con la función cor de stats
+
+
+# 6. Cross-correlation-based distances
+# Utiles para fuzzy k-means
+
+# (i) Mantegna 
+# La siguiente distancia se calcula como d_COR.1 = sqrt(2(1−ρ)), donde ρ es la correlación de Pearson
+# Esta distancia es la de Mantegna, en (Mantegna, 1999)
+
+diss.COR(time_series_list[[1]], time_series_list[[2]], beta = NULL)
+
+mantegna <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+mantegna <- diss(t(time_series_list), 'COR', beta = NULL)
+names(mantegna) <- stocks
+
+## Clustering Jerarquico de la librerí hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_mantegna_w <- hclust(mantegna, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_mantegna_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.mantegna <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.mantegna) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,1] <- cutree(hc_mantegna_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_mantegna_w2 <- hclust(mantegna, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,2] <- cutree(hc_mantegna_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_mantegna_complete <- hclust(mantegna, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,3] <- cutree(hc_mantegna_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_mantegna_single <- hclust(mantegna, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,4] <- cutree(hc_mantegna_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_mantegna_average <- hclust(mantegna, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,5] <- cutree(hc_mantegna_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_mantegna_mcquitty <- hclust(mantegna, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,6] <- cutree(hc_mantegna_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_mantegna_median <- hclust(mantegna, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,7] <- cutree(hc_mantegna_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_mantegna_centroid <- hclust(mantegna, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_mantegna_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_mantegna_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.mantegna[,8] <- cutree(hc_mantegna_centroid, k = 4)
+
+
+# (ii) La siguiente distancia se calcula como d_COR.2 = sqrt{[(1−ρ)/(1+ρ)]^β},
+# donde ρ es la correlación de Pearson y β es un parámetro de la rapidez en la que cae la distancia
+# regula la convergencia 
+
+diss.COR(time_series_list[[1]], time_series_list[[2]], beta = 0.5)
+
+cor2 <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+cor2 <- diss(t(time_series_list), 'COR', beta = 0.5)
+names(cor2) <- stocks
+
+## Clustering Jerarquico de la librería hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_cor2_w <- hclust(cor2, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_cor2_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.cor2 <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.cor2) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,1] <- cutree(hc_cor2_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_cor2_w2 <- hclust(cor2, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,2] <- cutree(hc_cor2_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_cor2_complete <- hclust(cor2, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,3] <- cutree(hc_cor2_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_cor2_single <- hclust(cor2, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,4] <- cutree(hc_cor2_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_cor2_average <- hclust(cor2, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,5] <- cutree(hc_cor2_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_cor2_mcquitty <- hclust(cor2, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,6] <- cutree(hc_cor2_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_cor2_median <- hclust(cor2, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,7] <- cutree(hc_cor2_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_cor2_centroid <- hclust(cor2, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_cor2_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_cor2_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.cor2[,8] <- cutree(hc_cor2_centroid, k = 4)
+
+
+
+
+
+# 7. Autocorrelation-based distances 
+# Se basa en el cálculo de estimadores de la autocorrelación de las series de tiempo, 
+# Se calcula como sqrt{(ρ_x-ρ_y)^TΩ(ρ_x-ρ_y)} donde ρ_x y ρ_y son los vetores de autocorrelación estimados
+# Ω es una matriz de pesos 
+
+# (i) Si Ω es la identidad entonces la distancia basada en ACF
+# se calcula como d_ACFU = sqrt{sum_i[(ρ_i,x-ρ_i,y)^2]}
+
+I = diag(nrow = 50) # Matriz identidad del tamaño de lags a considerar
+
+acfu <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+acfu <- diss(t(time_series_list), 'ACF', omega = I, lag.max=50)
+names(acfu) <- stocks
+
+## Clustering Jerarquico de la librería hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_acfu_w <- hclust(acfu, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_acfu_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.acfu <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.acfu) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,1] <- cutree(hc_acfu_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_acfu_w2 <- hclust(acfu, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,2] <- cutree(hc_acfu_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_acfu_complete <- hclust(acfu, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,3] <- cutree(hc_acfu_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_acfu_single <- hclust(acfu, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,4] <- cutree(hc_acfu_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_acfu_average <- hclust(acfu, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,5] <- cutree(hc_acfu_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_acfu_mcquitty <- hclust(acfu, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,6] <- cutree(hc_acfu_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_acfu_median <- hclust(acfu, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,7] <- cutree(hc_acfu_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_acfu_centroid <- hclust(acfu, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfu_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfu_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfu[,8] <- cutree(hc_acfu_centroid, k = 4)
+
+
+# (ii) Si Ω son pesos que decaen geometricamente con los lags de autocorrelación se obtiene otra distancia útil
+# se calcula como d_ACFG = sqrt{sum_i[p(1-p)^i(ρ_i,x-ρ_i,y)^2]} con 0<p<1 que permite indicar la caída geometrica
+
+diss.ACF(time_series_list[[1]], time_series_list[[2]], p = 0.5, lag.max=50) # Se toma p = 0.5
+
+I = diag(nrow = 50) # Matriz identidad del tamaño de lags a considerar
+
+acfg <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+acfg <- diss(t(time_series_list), 'ACF',  p = 0.5, lag.max=50) # Se toma p = 0.5
+names(acfg) <- stocks
+
+## Clustering Jerarquico de la librería hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_acfg_w <- hclust(acfg, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_acfg_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.acfg <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.acfg) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,1] <- cutree(hc_acfg_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_acfg_w2 <- hclust(acfg, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,2] <- cutree(hc_acfg_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_acfg_complete <- hclust(acfg, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,3] <- cutree(hc_acfg_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_acfg_single <- hclust(acfg, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,4] <- cutree(hc_acfg_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_acfg_average <- hclust(acfg, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,5] <- cutree(hc_acfg_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_acfg_mcquitty <- hclust(acfg, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,6] <- cutree(hc_acfg_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_acfg_median <- hclust(acfg, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,7] <- cutree(hc_acfg_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_acfg_centroid <- hclust(acfg, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_acfg_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_acfg_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.acfg[,8] <- cutree(hc_acfg_centroid, k = 4)
+
+
+# 8. Partial Autocorrelation-based Dissimilarity
+
+# Se basa en el cálculo de estimadores de la autocorrelación de las series de tiempo, 
+# Se calcula como sqrt{(ρ_x-ρ_y)^TΩ(ρ_x-ρ_y)} donde ρ_x y ρ_y son los vectores de autocorrelación (PARCIAL) estimados
+# Ω es una matriz de pesos 
+
+# (i) Si Ω es la identidad entonces la distancia basada en PACF
+# se calcula como d_PACFU = sqrt{sum_i[(ρ_i,x-ρ_i,y)^2]}
+
+I = diag(nrow = 50) # Matriz identidad del tamaño de lags a considerar
+
+acf(time_series_list[[1]], 50) # Se observa que el acf decae lentamente
+pacf(time_series_list[[1]], 50) # Se observa que el pacf cae ráidamente en el primer lag
+
+diss.PACF(time_series_list[[1]], time_series_list[[2]], omega = I, lag.max=50) # Se consideran 50 por default
+
+pacfu <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+pacfu <- diss(t(time_series_list), 'PACF', omega = I, lag.max=50)
+names(pacfu) <- stocks
+
+## Clustering Jerarquico de la librería hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_pacfu_w <- hclust(pacfu, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_pacfu_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.pacfu <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.pacfu) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,1] <- cutree(hc_pacfu_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_pacfu_w2 <- hclust(pacfu, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,2] <- cutree(hc_pacfu_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_pacfu_complete <- hclust(pacfu, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,3] <- cutree(hc_pacfu_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_pacfu_single <- hclust(pacfu, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,4] <- cutree(hc_pacfu_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_pacfu_average <- hclust(pacfu, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,5] <- cutree(hc_pacfu_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_pacfu_mcquitty <- hclust(pacfu, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,6] <- cutree(hc_pacfu_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_pacfu_median <- hclust(pacfu, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,7] <- cutree(hc_pacfu_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_pacfu_centroid <- hclust(pacfu, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfu_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfu_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfu[,8] <- cutree(hc_pacfu_centroid, k = 4)
+
+
+# (ii) Si Ω son pesos que decaen geometricamente con los lags de autocorrelación se obtiene otra distancia útil
+# se calcula como d_ACFG = sqrt{sum_i[p(1-p)^i(ρ_i,x-ρ_i,y)^2]} con 0<p<1 que permite indicar la caída geometrica
+
+diss.PACF(time_series_list[[1]], time_series_list[[2]], p = 0.5, lag.max=50) # Se toma p = 0.5
+
+I = diag(nrow = 50) # Matriz identidad del tamaño de lags a considerar
+
+pacfg <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+pacfg <- diss(t(time_series_list), 'PACF',  p = 0.5, lag.max=50) # Se toma p = 0.5
+names(pacfg) <- stocks
+
+## Clustering Jerarquico de la librería hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_pacfg_w <- hclust(pacfg, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_pacfg_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.pacfg <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.pacfg) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,1] <- cutree(hc_pacfg_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_pacfg_w2 <- hclust(pacfg, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,2] <- cutree(hc_pacfg_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_pacfg_complete <- hclust(pacfg, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,3] <- cutree(hc_pacfg_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_pacfg_single <- hclust(pacfg, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,4] <- cutree(hc_pacfg_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_pacfg_average <- hclust(pacfg, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,5] <- cutree(hc_pacfg_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_pacfg_mcquitty <- hclust(pacfg, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,6] <- cutree(hc_pacfg_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_pacfg_median <- hclust(pacfg, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,7] <- cutree(hc_pacfg_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_pacfg_centroid <- hclust(pacfg, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_pacfg_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_pacfg_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.pacfg[,8] <- cutree(hc_pacfg_centroid, k = 4)
+
+
+# 18. Complexity-based approaches: aproximando Kolmogorov complexity
+# type can be "gzip", "bzip2" or "xz". "min" selects the best separately for x, y and the concatenation
+
+# (i) Type = min
+diss.NCD(time_series_list[[1]], time_series_list[[2]])
+
+# Generalizamos 
+complex_ncd <- matrix(0, nrow = length(stocks), ncol = length(stocks), dimnames = list(stocks, stocks))
+
+complex_ncd <- diss(t(time_series_list), 'NCD')
+names(complex_ncd) <- stocks
+
+## Clustering Jerarquico de la librería hclust {stats}, existen otras librerías
+
+
+# (i) Ward's
+
+hc_complex_ncd_w <- hclust(complex_ncd, method = "ward.D")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_w.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_w)
+dev.off()
+
+# Etiquetas asignando un número de grupos o nivel de heigth, se escogen 4
+hc_complex_ncd_w$height
+
+# Matriz que contendra las diferentes etiquetas para diferentes matrices
+
+Four.cluster.sol.complex_ncd <- matrix(0, nrow = 12, ncol = 8)
+rownames(Four.cluster.sol.complex_ncd) <- stocks
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,1] <- cutree(hc_complex_ncd_w, k = 4)
+
+
+# (ii) "ward.D2"
+
+hc_complex_ncd_w2 <- hclust(complex_ncd, method = "ward.D2")
+
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_w2.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_w2)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,2] <- cutree(hc_complex_ncd_w2, k = 4)
+
+# Reproduce practicamente el dendograma de la distancia Euclidiana
+
+# (iii) The complete linkage method finds similar clusters.
+
+hc_complex_ncd_complete <- hclust(complex_ncd, method = "complete")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_complete.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_complete)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,3] <- cutree(hc_complex_ncd_complete, k = 4)
+
+
+# (iv) The single linkage method (which is closely related to the minimal spanning tree) adopts a ‘friends of friends’ clustering strategy. 
+
+hc_complex_ncd_single <- hclust(complex_ncd, method = "single")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_single.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_single)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,4] <- cutree(hc_complex_ncd_single, k = 4)
+
+#Parece una cascada?
+
+# (v) average (UPGMA)
+
+hc_complex_ncd_average <- hclust(complex_ncd, method = "average")
+length(time_series_list[[1]])
+is.na(time_series_list)
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_average.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_average)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,5] <- cutree(hc_complex_ncd_average, k = 4)
+
+
+# (vi) mcquitty (weighted average linkage, aka WPGMA)
+
+hc_complex_ncd_mcquitty <- hclust(complex_ncd, method = "mcquitty")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_mcquitty.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_mcquitty)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,6] <- cutree(hc_complex_ncd_mcquitty, k = 4)
+
+# (vii) median (WPGMC)
+
+hc_complex_ncd_median <- hclust(complex_ncd, method = "median")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_median.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_median)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,7] <- cutree(hc_complex_ncd_median, k = 4)
+
+
+# (viii) centroid (UPGMC)
+
+hc_complex_ncd_centroid <- hclust(complex_ncd, method = "centroid")
+
+# Guardar dendograma
+graphics.off()
+png(filename = "hc_complex_ncd_centroid.png", width = 15, height = 7, units = "in", res = 75)
+plot(hc_complex_ncd_centroid)
+dev.off()
+
+#tree en 4 clusters
+Four.cluster.sol.complex_ncd[,8] <- cutree(hc_complex_ncd_centroid, k = 4)
+
+
+# Es no simetrica y no es cero para la misma serie
+# The smaller the dNCD (XT ;YT ), the more closely related XT and YT are
